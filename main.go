@@ -7,15 +7,17 @@ import (
 )
 
 type Challenge struct {
-	ID          string
-	name        string
-	description string
-	targetValue float64
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	TargetValue float64 `json:"targetValue"`
 }
 
 func main() {
 	var challenges = []Challenge{
-		{ID: "1", name: "Férias de verão", description: "Férias de verão com destino ao nordeste", targetValue: 10000}}
+		{ID: "1", Name: "Férias de verão", Description: "Férias de verão com destino ao nordeste", TargetValue: 10000},
+		{ID: "2", Name: "Playstation 5", Description: "Console novo 2025", TargetValue: 5000},
+	}
 	r := gin.Default()
 	r.GET("/challenges", func(c *gin.Context) {
 		c.JSON(200, challenges)
