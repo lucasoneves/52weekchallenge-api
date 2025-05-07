@@ -2,19 +2,23 @@ package main
 
 import (
 	"52weeks/models"
+	"encoding/json"
+	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-var challenges = []models.Challenge{
-	{ID: "1", Name: "Férias de verão", Description: "Férias de verão com destino ao nordeste", TargetValue: 10000, Progress: 50},
-	{ID: "2", Name: "Playstation 5", Description: "Console novo 2025", TargetValue: 5000, Progress: 20},
-	{ID: "3", Name: "Playstation 5", Description: "Console novo 2025", TargetValue: 5000, Progress: 45},
-}
+var challenges []models.Challenge
 
 func main() {
+	loadChallenges()
 	router := gin.Default()
 	router.GET("/challenges", getChallenges)
+	router.GET("/challenges/:id", getChallengeByID)
+	// router.PUT("/challenges/:id", updateChallenge)
+	// router.DELETE("/challenges/:id", deleteChallenge)
 	router.POST("/challenges", createChallenge)
 	router.Run()
 }
@@ -29,6 +33,58 @@ func createChallenge(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+
+	idGenerated := strconv.Itoa(len(challenges) + 1)
+
+	id, err := strconv.Atoi(idGenerated)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to generate ID"})
+	}
+	newChallenge.ID = strconv.Itoa(id)
+
 	challenges = append(challenges, newChallenge)
+
+	saveChallenge()
 	c.JSON(200, newChallenge)
+}
+
+func getChallengeByID(c *gin.Context) {
+	id := c.Param("id")
+	for _, challenge := range challenges {
+		if challenge.ID == id {
+			c.JSON(200, challenge)
+			return
+		}
+	}
+
+	c.JSON(404, gin.H{"error": "Challenge not found"})
+}
+
+func loadChallenges() {
+	file, err := os.Open("dados/challenge.json")
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		panic(err)
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+
+	if err := decoder.Decode(&challenges); err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		panic(err)
+	}
+}
+
+func saveChallenge() {
+	file, err := os.Create("dados/challenge.json")
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	if err := encoder.Encode(challenges); err != nil {
+		fmt.Println("Error encoding JSON:", err)
+	}
 }
