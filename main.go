@@ -14,14 +14,20 @@ var challenges []models.Challenge
 
 func main() {
 	loadChallenges()
+
 	router := gin.Default()
 	router.GET("/challenges", getChallenges)
 	router.GET("/challenges/:id", getChallengeByID)
-	// router.PUT("/challenges/:id", updateChallenge)
-	// router.DELETE("/challenges/:id", deleteChallenge)
+	router.PUT("/challenges/:id", updateChallenge)
+	router.DELETE("/challenges/:id", deleteChallenge)
 	router.POST("/challenges", createChallenge)
+	router.GET("/welcome", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "Olá Mundo"})
+	})
+
 	router.Run()
 }
+
 func getChallenges(c *gin.Context) {
 
 	c.JSON(200, challenges)
@@ -87,4 +93,22 @@ func saveChallenge() {
 	if err := encoder.Encode(challenges); err != nil {
 		fmt.Println("Error encoding JSON:", err)
 	}
+}
+
+func updateChallenge(c *gin.Context) {
+	c.JSON(200, gin.H{"message": "Updated deleted successfully"})
+}
+
+func deleteChallenge(c *gin.Context) {
+	id := c.Param("id")
+	for i, challenge := range challenges {
+		if challenge.ID == id {
+			challenges = append(challenges[:i], challenges[i+1:]...)
+			saveChallenge()
+			c.JSON(200, gin.H{"message": "Challenge deleted successfully"})
+			return
+		}
+	}
+
+	c.JSON(404, gin.H{"error": "Challenge not found"})
 }
