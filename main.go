@@ -117,9 +117,6 @@ func updateChallenge(c *gin.Context) {
 		return
 	}
 
-	// Verifica se um ID foi fornecido no corpo da requisição.
-	// Para requisições PUT, é comum não permitir um ID no corpo ou exigir que ele corresponda ao da URL.
-	// Aqui, vamos assumir que o ID no corpo não é permitido, pois o ID da URL é o autoritativo.
 	if updatedChallenge.ID != "" {
 		c.JSON(400, gin.H{"error": "O ID não deve ser fornecido no corpo da requisição para uma atualização. O ID da URL é utilizado."})
 		return
@@ -127,9 +124,9 @@ func updateChallenge(c *gin.Context) {
 	for i, challenge := range challenges {
 		if challenge.ID == id {
 			challenges[i] = updatedChallenge
-			challenges[i].ID = id // Garante que o ID da URL seja atribuído ao desafio atualizado
+			challenges[i].ID = id
 			saveChallenge()
-			c.JSON(200, challenges[i]) // Responde com o desafio atualizado
+			c.JSON(200, challenges[i])
 			return
 		}
 	}
