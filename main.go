@@ -95,10 +95,6 @@ func saveChallenge() {
 	}
 }
 
-func updateChallenge(c *gin.Context) {
-	c.JSON(200, gin.H{"message": "Updated deleted successfully"})
-}
-
 func deleteChallenge(c *gin.Context) {
 	id := c.Param("id")
 	for i, challenge := range challenges {
@@ -106,6 +102,34 @@ func deleteChallenge(c *gin.Context) {
 			challenges = append(challenges[:i], challenges[i+1:]...)
 			saveChallenge()
 			c.JSON(200, gin.H{"message": "Challenge deleted successfully"})
+			return
+		}
+	}
+
+	c.JSON(404, gin.H{"error": "Challenge not found"})
+}
+
+func updateChallenge(c *gin.Context) {
+	id := c.Param("id")
+	var updatedChallenge models.Challenge
+	if err := c.ShouldBindJSON(&updatedChallenge); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Verifica se um ID foi fornecido no corpo da requisição.
+	// Para requisições PUT, é comum não permitir um ID no corpo ou exigir que ele corresponda ao da URL.
+	// Aqui, vamos assumir que o ID no corpo não é permitido, pois o ID da URL é o autoritativo.
+	if updatedChallenge.ID != "" {
+		c.JSON(400, gin.H{"error": "O ID não deve ser fornecido no corpo da requisição para uma atualização. O ID da URL é utilizado."})
+		return
+	}
+	for i, challenge := range challenges {
+		if challenge.ID == id {
+			challenges[i] = updatedChallenge
+			challenges[i].ID = id // Garante que o ID da URL seja atribuído ao desafio atualizado
+			saveChallenge()
+			c.JSON(200, challenges[i]) // Responde com o desafio atualizado
 			return
 		}
 	}
