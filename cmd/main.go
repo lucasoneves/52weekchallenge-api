@@ -16,9 +16,7 @@ func main() {
 	router.PUT("/challenges/:id", handler.UpdateChallenge)
 	router.DELETE("/challenges/:id", handler.DeleteChallenge)
 	router.POST("/challenges", handler.CreateChallenge)
-	router.GET("/welcome", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "Olá Mundo"})
-	})
+	router.POST("/challenges/:id/comments", handler.PostComment)
 
 	router.Run()
 }
