@@ -18,5 +18,7 @@ func main() {
 	router.POST("/challenges", handler.CreateChallenge)
 	router.POST("/challenges/:id/comments", handler.PostComment)
 
+	router.POST("/user/register", handler.CreateUser)
+
 	router.Run()
 }
