@@ -3,6 +3,7 @@ package handler
 import (
 	"52weeks/internal/data"
 	"52weeks/internal/models"
+	"52weeks/internal/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,11 @@ func PostComment(c *gin.Context) {
 	var newComment models.Comment
 
 	if err := c.ShouldBindJSON(&newComment); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.ValidateReviewRating(newComment); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
